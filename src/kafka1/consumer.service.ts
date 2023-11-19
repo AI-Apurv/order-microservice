@@ -1,6 +1,5 @@
 import * as puppeteer from 'puppeteer';
 import * as nodemailer from 'nodemailer';
-import * as fs from 'fs';
 import * as ejs from 'ejs';
 import { Injectable } from '@nestjs/common';
 import { KafkaService } from './kafka.service'; 
