@@ -36,6 +36,7 @@ export class OrderService implements OnModuleInit {
       price: product.data.price * data.quantity,
       productId: product.data.id,
       userId: data.userId,
+      status:OrderStatus.BOOKED
     });
 
     try {
@@ -56,7 +57,6 @@ export class OrderService implements OnModuleInit {
   }
 
   public async cancelOrder(data: CancelOrderRequest): Promise<CancelOrderResponse> {
-
     const order = await this.orderModel.findById(data.orderId)
     const product = await firstValueFrom(this.productSvc.findOne({ id: order.productId }));
     if (order.userId !== data.userId)
