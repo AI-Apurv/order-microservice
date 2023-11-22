@@ -6,6 +6,7 @@ export interface Product {
     productId: string;
     quantity: number;
     unit_price: number;
+    sellerId:string;
 }
 
 @Schema()
@@ -18,6 +19,7 @@ export class Cart extends Document {
 
     @Prop()
     cartTotal: number;
+
 }
 
 export const CartItemSchema = SchemaFactory.createForClass(Cart)

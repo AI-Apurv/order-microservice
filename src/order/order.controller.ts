@@ -1,7 +1,7 @@
 import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { OrderService } from './order.service';
-import { ORDER_SERVICE_NAME, CreateOrderResponse, CancelOrderRequest, CancelOrderResponse, AddCartRequest, AddCartResponse, UpdateCartRequest, UpdateCartResponse, GetCartItemRequest, GetCartItemResponse, CreateOrderRequest } from './proto/order.pb';
+import { ORDER_SERVICE_NAME, CreateOrderResponse, CancelOrderRequest, CancelOrderResponse, AddCartRequest, AddCartResponse, UpdateCartRequest, UpdateCartResponse, GetCartItemRequest, GetCartItemResponse, CreateOrderRequest, GetOrderDetailsRequest, GetOrderDetailsResponse } from './proto/order.pb';
 import { CreateOrderRequestDto } from './order.dto';
 
 @Controller('order')
@@ -43,5 +43,11 @@ export class OrderController {
     }
 
   }
+
+  @GrpcMethod(ORDER_SERVICE_NAME, 'getOrderDetails')
+  private async getOrderDetails(data: GetOrderDetailsRequest): Promise<GetOrderDetailsResponse> {
+    return this.service.getOrderDetails(data.userId);
+  }
+
   
 }

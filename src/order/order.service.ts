@@ -3,64 +3,95 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { Order, OrderStatus } from './order.entity';
 import { FindOneResponse, ProductServiceClient, PRODUCT_SERVICE_NAME, DecreaseStockResponse } from './proto/product.pb';
-import { AddCartRequest, AddCartResponse, CancelOrderRequest, CancelOrderResponse, CreateOrderRequest, CreateOrderResponse, GetCartItemResponse, UpdateCartRequest, UpdateCartResponse } from './proto/order.pb';
+import { AddCartRequest, AddCartResponse, CancelOrderRequest, CancelOrderResponse, CreateOrderRequest, CreateOrderResponse, GetCartItemResponse, GetOrderDetailsResponse, OrderDetails, UpdateCartRequest, UpdateCartResponse } from './proto/order.pb';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { KafkaProducerService } from 'src/kafka1/producer.service';
 import { orderResponseMessages } from 'src/common/order.response';
 import { Cart } from './cart.entity';
+import { AUTH_SERVICE_NAME, AuthServiceClient, CheckWalletResponse } from './proto/auth.pb';
 
 @Injectable()
 export class OrderService implements OnModuleInit {
   constructor(
     @Inject(PRODUCT_SERVICE_NAME)
     private readonly client: ClientGrpc,
+    @Inject(AUTH_SERVICE_NAME)
+    private readonly client1: ClientGrpc,
     @InjectModel(Order.name)
     private readonly orderModel: Model<Order>,
     @InjectModel(Cart.name)
     private readonly cartModel: Model<Cart>,
     private readonly kafkaProducerService: KafkaProducerService) { }
     private productSvc: ProductServiceClient;
+    private userSvc:AuthServiceClient
 
 
   public onModuleInit(): void {
     this.productSvc = this.client.getService<ProductServiceClient>(PRODUCT_SERVICE_NAME);
+    this.userSvc = this.client1.getService<AuthServiceClient>(AUTH_SERVICE_NAME);
   }
 
   public async createOrder(data: CreateOrderRequest): Promise<CreateOrderResponse> {
-    const cart = await this.cartModel.findOne({customerId:data.userId})
-    if(!cart || !cart.products.length){
-      return {status:HttpStatus.BAD_REQUEST, error:null , response:orderResponseMessages.CART_NOT_FOUND}
+    const cart = await this.cartModel.findOne({ customerId: data.userId });
+  
+    if (!cart || !cart.products.length) {
+      return { status: HttpStatus.BAD_REQUEST, error: null, response: orderResponseMessages.CART_NOT_FOUND };
     }
-    const orderItems = cart.products.map(product => ({
-      userId: data.userId,
-      productId: product.productId,
-      quantity: product.quantity,
-      price: product.unit_price * product.quantity,
-      status: OrderStatus.BOOKED,
-    }));
-    const createdOrders= await this.orderModel.create(orderItems);
+  
+  
+    const { walletAmount } = await firstValueFrom(this.userSvc.checkWallet({ userId: data.userId }));
+  
+    if (cart.cartTotal > walletAmount) {
+      return { status: HttpStatus.BAD_REQUEST, response: orderResponseMessages.NOT_ENOUGH_BALANCE, error: null };
+    }
+  
+    const createdOrders: any[] = [];
+  
+    for (const product of cart.products) {
+      const orderItem = {
+        userId: data.userId,
+        productId: product.productId,
+        quantity: product.quantity,
+        price: product.unit_price * product.quantity,
+        sellerId: product['sellerId'],
+        status: OrderStatus.BOOKED,
+      };
+  
+  
+      await firstValueFrom(this.userSvc.moneyTransaction({
+        userId: data.userId,
+        sellerId: orderItem.sellerId,
+        amount: orderItem.price,
+      }));
+  
+      const createdOrder = await this.orderModel.create(orderItem);
+      createdOrders.push(createdOrder);
+  
+      const decreasedStockData: DecreaseStockResponse = await firstValueFrom(
+        this.productSvc.decreaseStock({ productId: product.productId, quantity: product.quantity })
+      );
+    }
+  
     const productDetails = cart.products.map(product => ({
       productId: product.productId,
       quantity: product.quantity,
       unit_price: product.unit_price,
     }));
+  
     const kafkaPayload = {
       orderId: createdOrders.map(order => order.id),
       products: productDetails,
       email: data.email,
     };
-    await this.kafkaProducerService.sendToKafka('orderPlaced', kafkaPayload)
-    for(const product of productDetails) {
-      const decreasedStockData:DecreaseStockResponse = await firstValueFrom(
-        this.productSvc.decreaseStock({productId:product.productId, quantity:product.quantity })
-      )
-    }
-    await this.cartModel.deleteOne({customerId:data.userId})
+  
+    await this.kafkaProducerService.sendToKafka('orderPlaced', kafkaPayload);
+  
+    await this.cartModel.deleteOne({ customerId: data.userId });
+  
     return { status: HttpStatus.OK, response: 'Order placed successfully', error: null };
-
   }
-
+  
 
 
   public async cancelOrder(data: CancelOrderRequest): Promise<CancelOrderResponse> {
@@ -71,6 +102,7 @@ export class OrderService implements OnModuleInit {
     else {
       await firstValueFrom(this.productSvc.updateStock({ productId: product.data.id, quantity: order.quantity }))
       order.status = OrderStatus.CANCELED;
+      await firstValueFrom(this.userSvc.moneyTransaction({userId:product.data.sellerId, sellerId:data.userId, amount:order.price}))
       order.save();
       return { status: HttpStatus.OK, response: orderResponseMessages.ORDER_CANCELLED, error: null }
     }
@@ -89,7 +121,8 @@ export class OrderService implements OnModuleInit {
         products: [{
           productId: addToCart.productId,
           quantity: addToCart.quantity,
-          unit_price: product.data.price
+          unit_price: product.data.price,
+          sellerId: product.data.sellerId
         }],
         cartTotal: product.data.price * addToCart.quantity,
       })
@@ -108,6 +141,7 @@ export class OrderService implements OnModuleInit {
           productId: addToCart.productId,
           quantity: addToCart.quantity,
           unit_price: product.data.price,
+          sellerId: product.data.sellerId
         });
         cart.cartTotal += product.data.price * addToCart.quantity;
       }
@@ -158,6 +192,23 @@ export class OrderService implements OnModuleInit {
     }))
 
     return {status: HttpStatus.OK , data:cartDetails, cartTotal:cart.cartTotal}
+  }
+
+  public async getOrderDetails(userId:string):Promise<GetOrderDetailsResponse> {
+    const order = await this.orderModel.find({userId:userId});
+    if(!order)
+      return {data:[]}
+
+    const getOrderDetails:OrderDetails[] = order.map(order => ({
+      productId: order.productId,
+      quantity:order.quantity,
+      price:order.price,
+      status:order.status
+    }));
+
+    return {data:getOrderDetails}
+
+
   }
 
 

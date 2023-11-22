@@ -7,6 +7,7 @@ import { PRODUCT_SERVICE_NAME, PRODUCT_PACKAGE_NAME } from './proto/product.pb';
 import { MongooseModule } from '@nestjs/mongoose';
 import { KafkaModule } from 'src/kafka1/kafka.module';
 import { CartItemSchema } from './cart.entity';
+import { AUTH_PACKAGE_NAME, AUTH_SERVICE_NAME } from './proto/auth.pb';
 
 @Module({
   imports: [
@@ -19,6 +20,17 @@ import { CartItemSchema } from './cart.entity';
           url: '0.0.0.0:50053',
           package: PRODUCT_PACKAGE_NAME,
           protoPath: 'node_modules/grpc-nest-proto/proto/product.proto',
+        },
+      }
+    ]),
+    ClientsModule.register([
+      {
+        name: AUTH_SERVICE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          url: '0.0.0.0:50051',
+          package: AUTH_PACKAGE_NAME,
+          protoPath: 'node_modules/grpc-nest-proto/proto/auth.proto',
         },
       },
     ]),

@@ -25,6 +25,7 @@ export interface FindOneData {
   description: string;
   stock: number;
   price: number;
+  sellerId: string;
 }
 
 export interface FindOneRequest {

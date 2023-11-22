@@ -11,5 +11,6 @@ export const orderResponseMessages = {
     NOT_AVAILABLE: 'Stock not available',
     ORDER_CANCELLED: 'order cancelled success',
     CART_NOT_FOUND: 'Add the product in the cart. Cart is empty',
-    NOT_PRESENT: 'product is not present in the cart'
+    NOT_PRESENT: 'product is not present in the cart',
+    NOT_ENOUGH_BALANCE: 'Insufficient balance. Add money in your wallet to complete the order'
 }

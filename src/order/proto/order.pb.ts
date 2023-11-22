@@ -4,6 +4,21 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "order";
 
+export interface GetOrderDetailsRequest {
+  userId: string;
+}
+
+export interface OrderDetails {
+  productId: string;
+  quantity: number;
+  price: number;
+  status: string;
+}
+
+export interface GetOrderDetailsResponse {
+  data: OrderDetails[];
+}
+
 export interface CreateOrderRequest {
   userId: string;
   email: string;
@@ -78,6 +93,8 @@ export interface OrderServiceClient {
   createOrder(request: CreateOrderRequest): Observable<CreateOrderResponse>;
 
   cancelOrder(request: CancelOrderRequest): Observable<CancelOrderResponse>;
+
+  getOrderDetails(request: GetOrderDetailsRequest): Observable<GetOrderDetailsResponse>;
 }
 
 export interface OrderServiceController {
@@ -98,11 +115,22 @@ export interface OrderServiceController {
   cancelOrder(
     request: CancelOrderRequest,
   ): Promise<CancelOrderResponse> | Observable<CancelOrderResponse> | CancelOrderResponse;
+
+  getOrderDetails(
+    request: GetOrderDetailsRequest,
+  ): Promise<GetOrderDetailsResponse> | Observable<GetOrderDetailsResponse> | GetOrderDetailsResponse;
 }
 
 export function OrderServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["addCart", "updateCart", "getCartDetails", "createOrder", "cancelOrder"];
+    const grpcMethods: string[] = [
+      "addCart",
+      "updateCart",
+      "getCartDetails",
+      "createOrder",
+      "cancelOrder",
+      "getOrderDetails",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("OrderService", method)(constructor.prototype[method], method, descriptor);

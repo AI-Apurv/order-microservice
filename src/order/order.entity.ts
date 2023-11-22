@@ -23,8 +23,13 @@ export class Order extends Document {
     @Prop({ type: String })
     public userId: string;
 
+    @Prop()
+    public sellerId:string;
+
     @Prop({type: String, enum: OrderStatus, default: OrderStatus.PENDING})
     public status: string;
+
+   
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
