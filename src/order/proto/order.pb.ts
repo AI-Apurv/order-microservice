@@ -5,8 +5,6 @@ import { Observable } from "rxjs";
 export const protobufPackage = "order";
 
 export interface CreateOrderRequest {
-  productId: string;
-  quantity: number;
   userId: string;
   email: string;
 }
@@ -14,7 +12,6 @@ export interface CreateOrderRequest {
 export interface CreateOrderResponse {
   status: number;
   error: string[];
-  id: string;
   response: string;
 }
 
@@ -29,15 +26,71 @@ export interface CancelOrderResponse {
   response: string;
 }
 
+export interface AddCartRequest {
+  productId: string;
+  quantity: number;
+  userId: string;
+}
+
+export interface AddCartResponse {
+  status: number;
+  response: string;
+  error: string[];
+}
+
+export interface UpdateCartRequest {
+  userId: string;
+  productId: string;
+  quantity: number;
+}
+
+export interface UpdateCartResponse {
+  status: number;
+  response: string;
+  error: string[];
+}
+
+export interface GetCartItemRequest {
+  userId: string;
+}
+
+export interface cartDetails {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface GetCartItemResponse {
+  status: number;
+  data: cartDetails[];
+  cartTotal: number;
+}
+
 export const ORDER_PACKAGE_NAME = "order";
 
 export interface OrderServiceClient {
+  addCart(request: AddCartRequest): Observable<AddCartResponse>;
+
+  updateCart(request: UpdateCartRequest): Observable<UpdateCartResponse>;
+
+  getCartDetails(request: GetCartItemRequest): Observable<GetCartItemResponse>;
+
   createOrder(request: CreateOrderRequest): Observable<CreateOrderResponse>;
 
   cancelOrder(request: CancelOrderRequest): Observable<CancelOrderResponse>;
 }
 
 export interface OrderServiceController {
+  addCart(request: AddCartRequest): Promise<AddCartResponse> | Observable<AddCartResponse> | AddCartResponse;
+
+  updateCart(
+    request: UpdateCartRequest,
+  ): Promise<UpdateCartResponse> | Observable<UpdateCartResponse> | UpdateCartResponse;
+
+  getCartDetails(
+    request: GetCartItemRequest,
+  ): Promise<GetCartItemResponse> | Observable<GetCartItemResponse> | GetCartItemResponse;
+
   createOrder(
     request: CreateOrderRequest,
   ): Promise<CreateOrderResponse> | Observable<CreateOrderResponse> | CreateOrderResponse;
@@ -49,7 +102,7 @@ export interface OrderServiceController {
 
 export function OrderServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["createOrder", "cancelOrder"];
+    const grpcMethods: string[] = ["addCart", "updateCart", "getCartDetails", "createOrder", "cancelOrder"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("OrderService", method)(constructor.prototype[method], method, descriptor);

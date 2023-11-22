@@ -9,6 +9,7 @@ export const orderResponseMessages = {
     SESSION_EXPIRED: 'Checkout session expired',
     NOT_FOUND: 'Product not found',
     NOT_AVAILABLE: 'Stock not available',
-    ORDER_CANCELLED: 'order cancelled success'
-    
+    ORDER_CANCELLED: 'order cancelled success',
+    CART_NOT_FOUND: 'Add the product in the cart. Cart is empty',
+    NOT_PRESENT: 'product is not present in the cart'
 }

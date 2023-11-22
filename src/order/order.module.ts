@@ -6,6 +6,7 @@ import { OrderService } from './order.service';
 import { PRODUCT_SERVICE_NAME, PRODUCT_PACKAGE_NAME } from './proto/product.pb';
 import { MongooseModule } from '@nestjs/mongoose';
 import { KafkaModule } from 'src/kafka1/kafka.module';
+import { CartItemSchema } from './cart.entity';
 
 @Module({
   imports: [
@@ -22,8 +23,8 @@ import { KafkaModule } from 'src/kafka1/kafka.module';
       },
     ]),
     MongooseModule.forFeature([
-      {name: 'Order', schema:OrderSchema}
-
+      {name: 'Order', schema:OrderSchema},
+      {name: 'Cart', schema: CartItemSchema},
     ]),
   ],
   controllers: [OrderController],

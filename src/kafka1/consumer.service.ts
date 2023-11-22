@@ -36,7 +36,7 @@ export class KafkaConsumerService {
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
     await page.setContent(renderedHTML);
-    const pdfPath = `/home/admin2/Desktop/pdfs/transaction_${transactionData.Totalprice}.pdf`;
+    const pdfPath = `/home/admin2/Desktop/pdfs/transaction_${transactionData.email}.pdf`;
     await page.pdf({ path: pdfPath, format: 'A4' });
 
     await browser.close();

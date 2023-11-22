@@ -14,6 +14,9 @@ export class Order extends Document {
     @Prop({ type: Number, default: 0 })
     public price: number;
 
+    @Prop()
+    public quantity: number;
+
     @Prop({ type: String })
     public productId: string;
 

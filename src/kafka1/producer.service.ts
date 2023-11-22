@@ -17,6 +17,7 @@ export class KafkaProducerService {
 
   async sendToKafka(topic: string, data: any): Promise<void> {
     await this.producer.connect();
+    console.log('*************',data,JSON.stringify(data));
     await this.producer.send({
       topic,
       messages: [
