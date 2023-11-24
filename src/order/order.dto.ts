@@ -12,6 +12,6 @@ export class CreateOrderRequestDto implements CreateOrderRequest {
   @IsString()
   public userId: string;
 
-   @IsString()
-   email:string;
+  @IsString()
+  email: string;
 }

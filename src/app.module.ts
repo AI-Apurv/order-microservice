@@ -3,11 +3,19 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OrderModule } from './order/order.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb+srv://apurv07012001:eovJNBoS9ZztwYoW@cluster1.ze1sxux.mongodb.net/micro_order'),
-    OrderModule
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRootAsync({
+      useFactory: () => ({
+        uri: process.env.ORDER_DB,
+      }),
+    }),
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

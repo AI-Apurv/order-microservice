@@ -2,15 +2,15 @@ import * as puppeteer from 'puppeteer';
 import * as nodemailer from 'nodemailer';
 import * as ejs from 'ejs';
 import { Injectable } from '@nestjs/common';
-import { KafkaService } from './kafka.service'; 
+import { KafkaService } from './kafka.service';
 
 @Injectable()
 export class KafkaConsumerService {
   constructor(private readonly kafkaService: KafkaService) {}
 
   async startConsumer() {
-    const consumer = this.kafkaService.getConsumer(); 
-    consumer.subscribe({ topic: 'orderPlaced' }); 
+    const consumer = this.kafkaService.getConsumer();
+    consumer.subscribe({ topic: 'orderPlaced' });
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         const orderdata = JSON.parse(message.value.toString());
@@ -30,10 +30,13 @@ export class KafkaConsumerService {
   }
 
   async generatePDF(transactionData: any): Promise<string> {
-    const templatePath = '/home/admin2/Desktop/tryingKafka/grpc-nest-order/src/utils/templates/orderPlaced.ejs';
-    const renderedHTML = await ejs.renderFile(templatePath, { data: transactionData });
+    const templatePath =
+      '/home/admin2/Desktop/tryingKafka/grpc-nest-order/src/utils/templates/orderPlaced.ejs';
+    const renderedHTML = await ejs.renderFile(templatePath, {
+      data: transactionData,
+    });
 
-    const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await puppeteer.launch({ headless: 'new' });
     const page = await browser.newPage();
     await page.setContent(renderedHTML);
     const pdfPath = `/home/admin2/Desktop/pdfs/transaction_${transactionData.email}.pdf`;
@@ -45,15 +48,15 @@ export class KafkaConsumerService {
 
   async sendEmailWithAttachment(email: string, pdfPath: string) {
     const transporter = nodemailer.createTransport({
-      service: 'gmail', 
+      service: 'gmail',
       auth: {
-        user: 'apurv1@appinventiv.com',
-        pass: 'atldfmccuufdvqzm',
+        user: process.env.EMAIL,
+        pass: process.env.PASS,
       },
     });
 
     const mailOptions = {
-      from: 'apurv1@appinventiv.com',
+      from: process.env.EMAIL,
       to: email,
       subject: 'Order Details',
       text: 'Your order has been placed successfully.Please find attached order details',
@@ -62,6 +65,4 @@ export class KafkaConsumerService {
 
     await transporter.sendMail(mailOptions);
   }
-
-
 }

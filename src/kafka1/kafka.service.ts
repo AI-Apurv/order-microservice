@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Consumer, Kafka } from 'kafkajs'; 
+import { Consumer, Kafka } from 'kafkajs';
 
 @Injectable()
 export class KafkaService {
@@ -8,12 +8,12 @@ export class KafkaService {
 
   constructor() {
     this.kafka = new Kafka({
-      clientId: 'orders-microservice', 
-      brokers: ['localhost:9092'], 
+      clientId: 'orders-microservice',
+      brokers: ['localhost:9092'],
     });
     this.consumer = this.kafka.consumer({ groupId: 'kafka-group' });
   }
-
+  'apurv1@appinventiv.com';
   getProducer() {
     return this.kafka.producer();
   }

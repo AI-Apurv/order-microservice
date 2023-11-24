@@ -1,8 +1,8 @@
 /* eslint-disable */
-import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
-import { Observable } from "rxjs";
+import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
+import { Observable } from 'rxjs';
 
-export const protobufPackage = "auth";
+export const protobufPackage = 'auth';
 
 export interface TransferMoneyRequest {
   userId: string;
@@ -135,7 +135,7 @@ export interface AddWalletAmountResponse {
   error: string[];
 }
 
-export const AUTH_PACKAGE_NAME = "auth";
+export const AUTH_PACKAGE_NAME = 'auth';
 
 export interface AuthServiceClient {
   register(request: RegisterRequest): Observable<RegisterResponse>;
@@ -148,80 +148,138 @@ export interface AuthServiceClient {
 
   update(request: UpdateRequest): Observable<UpdateResponse>;
 
-  changePassword(request: ChangePasswordRequest): Observable<ChangePasswordResponse>;
-
-  forgetPassword(request: ForgetPasswordRequest): Observable<ForgetPasswordResponse>;
-
-  resetPassword(request: ResetPasswordRequest): Observable<ResetPasswordResponse>;
-
-  addWalletAmount(request: AddWalletAmountRequest): Observable<AddWalletAmountResponse>;
-
-  checkWallet(request: CheckWalletRequest): Observable<CheckWalletResponse>;
-
-  moneyTransaction(request: TransferMoneyRequest): Observable<TransferMoneyResponse>;
-}
-
-export interface AuthServiceController {
-  register(request: RegisterRequest): Promise<RegisterResponse> | Observable<RegisterResponse> | RegisterResponse;
-
-  login(request: LoginRequest): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
-
-  validate(request: ValidateRequest): Promise<ValidateResponse> | Observable<ValidateResponse> | ValidateResponse;
-
-  logout(request: LogoutRequest): Promise<LogoutResponse> | Observable<LogoutResponse> | LogoutResponse;
-
-  update(request: UpdateRequest): Promise<UpdateResponse> | Observable<UpdateResponse> | UpdateResponse;
-
   changePassword(
     request: ChangePasswordRequest,
-  ): Promise<ChangePasswordResponse> | Observable<ChangePasswordResponse> | ChangePasswordResponse;
+  ): Observable<ChangePasswordResponse>;
 
   forgetPassword(
     request: ForgetPasswordRequest,
-  ): Promise<ForgetPasswordResponse> | Observable<ForgetPasswordResponse> | ForgetPasswordResponse;
+  ): Observable<ForgetPasswordResponse>;
 
   resetPassword(
     request: ResetPasswordRequest,
-  ): Promise<ResetPasswordResponse> | Observable<ResetPasswordResponse> | ResetPasswordResponse;
+  ): Observable<ResetPasswordResponse>;
 
   addWalletAmount(
     request: AddWalletAmountRequest,
-  ): Promise<AddWalletAmountResponse> | Observable<AddWalletAmountResponse> | AddWalletAmountResponse;
+  ): Observable<AddWalletAmountResponse>;
 
-  checkWallet(
-    request: CheckWalletRequest,
-  ): Promise<CheckWalletResponse> | Observable<CheckWalletResponse> | CheckWalletResponse;
+  checkWallet(request: CheckWalletRequest): Observable<CheckWalletResponse>;
 
   moneyTransaction(
     request: TransferMoneyRequest,
-  ): Promise<TransferMoneyResponse> | Observable<TransferMoneyResponse> | TransferMoneyResponse;
+  ): Observable<TransferMoneyResponse>;
+}
+
+export interface AuthServiceController {
+  register(
+    request: RegisterRequest,
+  ):
+    | Promise<RegisterResponse>
+    | Observable<RegisterResponse>
+    | RegisterResponse;
+
+  login(
+    request: LoginRequest,
+  ): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
+
+  validate(
+    request: ValidateRequest,
+  ):
+    | Promise<ValidateResponse>
+    | Observable<ValidateResponse>
+    | ValidateResponse;
+
+  logout(
+    request: LogoutRequest,
+  ): Promise<LogoutResponse> | Observable<LogoutResponse> | LogoutResponse;
+
+  update(
+    request: UpdateRequest,
+  ): Promise<UpdateResponse> | Observable<UpdateResponse> | UpdateResponse;
+
+  changePassword(
+    request: ChangePasswordRequest,
+  ):
+    | Promise<ChangePasswordResponse>
+    | Observable<ChangePasswordResponse>
+    | ChangePasswordResponse;
+
+  forgetPassword(
+    request: ForgetPasswordRequest,
+  ):
+    | Promise<ForgetPasswordResponse>
+    | Observable<ForgetPasswordResponse>
+    | ForgetPasswordResponse;
+
+  resetPassword(
+    request: ResetPasswordRequest,
+  ):
+    | Promise<ResetPasswordResponse>
+    | Observable<ResetPasswordResponse>
+    | ResetPasswordResponse;
+
+  addWalletAmount(
+    request: AddWalletAmountRequest,
+  ):
+    | Promise<AddWalletAmountResponse>
+    | Observable<AddWalletAmountResponse>
+    | AddWalletAmountResponse;
+
+  checkWallet(
+    request: CheckWalletRequest,
+  ):
+    | Promise<CheckWalletResponse>
+    | Observable<CheckWalletResponse>
+    | CheckWalletResponse;
+
+  moneyTransaction(
+    request: TransferMoneyRequest,
+  ):
+    | Promise<TransferMoneyResponse>
+    | Observable<TransferMoneyResponse>
+    | TransferMoneyResponse;
 }
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
-      "register",
-      "login",
-      "validate",
-      "logout",
-      "update",
-      "changePassword",
-      "forgetPassword",
-      "resetPassword",
-      "addWalletAmount",
-      "checkWallet",
-      "moneyTransaction",
+      'register',
+      'login',
+      'validate',
+      'logout',
+      'update',
+      'changePassword',
+      'forgetPassword',
+      'resetPassword',
+      'addWalletAmount',
+      'checkWallet',
+      'moneyTransaction',
     ];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('AuthService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("AuthService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('AuthService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
     }
   };
 }
 
-export const AUTH_SERVICE_NAME = "AuthService";
+export const AUTH_SERVICE_NAME = 'AuthService';

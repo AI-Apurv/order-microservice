@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Kafka } from 'kafkajs'; 
+import { Kafka } from 'kafkajs';
 
 @Injectable()
 export class KafkaProducerService {
@@ -8,8 +8,8 @@ export class KafkaProducerService {
 
   constructor() {
     this.kafka = new Kafka({
-        clientId: 'orders-service',
-        brokers: ['localhost:9092'],
+      clientId: 'orders-service',
+      brokers: ['localhost:9092'],
     });
 
     this.producer = this.kafka.producer();
@@ -17,7 +17,7 @@ export class KafkaProducerService {
 
   async sendToKafka(topic: string, data: any): Promise<void> {
     await this.producer.connect();
-    console.log('*************',data,JSON.stringify(data));
+    console.log('*************', data, JSON.stringify(data));
     await this.producer.send({
       topic,
       messages: [

@@ -21,7 +21,7 @@ import { AUTH_PACKAGE_NAME, AUTH_SERVICE_NAME } from './proto/auth.pb';
           package: PRODUCT_PACKAGE_NAME,
           protoPath: 'node_modules/grpc-nest-proto/proto/product.proto',
         },
-      }
+      },
     ]),
     ClientsModule.register([
       {
@@ -35,8 +35,8 @@ import { AUTH_PACKAGE_NAME, AUTH_SERVICE_NAME } from './proto/auth.pb';
       },
     ]),
     MongooseModule.forFeature([
-      {name: 'Order', schema:OrderSchema},
-      {name: 'Cart', schema: CartItemSchema},
+      { name: 'Order', schema: OrderSchema },
+      { name: 'Cart', schema: CartItemSchema },
     ]),
   ],
   controllers: [OrderController],
