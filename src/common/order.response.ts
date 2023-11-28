@@ -16,4 +16,6 @@ export const orderResponseMessages = {
   NOT_ENOUGH_BALANCE:
     'Insufficient balance. Add money in your wallet to complete the order',
   ALREADY_CANCELLED: 'You have already cancelled the order',
+  CART_UPDATED: 'Cart updated successfuly',
+  PRODUCT_ADD: 'Product added to the cart',
 };

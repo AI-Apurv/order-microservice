@@ -16,7 +16,7 @@ import {
   GetOrderDetailsRequest,
   GetOrderDetailsResponse,
 } from './proto/order.pb';
-import { CreateOrderRequestDto } from './order.dto';
+import { orderResponseMessages } from 'src/common/order.response';
 
 @Controller('order')
 export class OrderController {
@@ -40,7 +40,11 @@ export class OrderController {
   @GrpcMethod(ORDER_SERVICE_NAME, 'addCart')
   private async addCart(payload: AddCartRequest): Promise<AddCartResponse> {
     await this.service.addToCart(payload);
-    return { status: HttpStatus.OK, response: 'Added to cart', error: null };
+    return {
+      status: HttpStatus.OK,
+      response: orderResponseMessages.PRODUCT_ADD,
+      error: null,
+    };
   }
 
   @GrpcMethod(ORDER_SERVICE_NAME, 'updateCart')
@@ -50,7 +54,7 @@ export class OrderController {
     await this.service.updateCart(payload);
     return {
       status: HttpStatus.OK,
-      response: 'Cart updated successfuly',
+      response: orderResponseMessages.CART_UPDATED,
       error: null,
     };
   }

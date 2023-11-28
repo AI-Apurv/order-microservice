@@ -1,5 +1,5 @@
 import { IsNumber, IsString, Min } from 'class-validator';
-import { CreateOrderRequest } from './proto/order.pb';
+import { CreateOrderRequest } from '../proto/order.pb';
 
 export class CreateOrderRequestDto implements CreateOrderRequest {
   @IsString()

@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { OrderController } from './order.controller';
-import { Order, OrderSchema } from './order.entity';
+import { OrderSchema } from './entity/order.entity';
 import { OrderService } from './order.service';
 import { PRODUCT_SERVICE_NAME, PRODUCT_PACKAGE_NAME } from './proto/product.pb';
 import { MongooseModule } from '@nestjs/mongoose';
 import { KafkaModule } from 'src/kafka1/kafka.module';
-import { CartItemSchema } from './cart.entity';
+import { CartItemSchema } from './entity/cart.entity';
 import { AUTH_PACKAGE_NAME, AUTH_SERVICE_NAME } from './proto/auth.pb';
+import { TransactionSchema } from './entity/transaction.entity';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { AUTH_PACKAGE_NAME, AUTH_SERVICE_NAME } from './proto/auth.pb';
     MongooseModule.forFeature([
       { name: 'Order', schema: OrderSchema },
       { name: 'Cart', schema: CartItemSchema },
+      { name: 'Transaction', schema: TransactionSchema },
     ]),
   ],
   controllers: [OrderController],

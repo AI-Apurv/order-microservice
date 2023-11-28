@@ -2,12 +2,11 @@ import {
   HttpStatus,
   Inject,
   Injectable,
-  InternalServerErrorException,
   OnModuleInit,
 } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { Order, OrderStatus } from './order.entity';
+import { Order, OrderStatus } from './entity/order.entity';
 import {
   FindOneResponse,
   ProductServiceClient,
@@ -31,12 +30,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { KafkaProducerService } from 'src/kafka1/producer.service';
 import { orderResponseMessages } from 'src/common/order.response';
-import { Cart } from './cart.entity';
+import { Cart } from './entity/cart.entity';
 import {
   AUTH_SERVICE_NAME,
   AuthServiceClient,
   CheckWalletResponse,
 } from './proto/auth.pb';
+import { Transaction } from './entity/transaction.entity';
 
 @Injectable()
 export class OrderService implements OnModuleInit {
@@ -49,6 +49,8 @@ export class OrderService implements OnModuleInit {
     private readonly orderModel: Model<Order>,
     @InjectModel(Cart.name)
     private readonly cartModel: Model<Cart>,
+    @InjectModel(Transaction.name)
+    private readonly transactionModel: Model<Transaction>,
     private readonly kafkaProducerService: KafkaProducerService,
   ) {}
   private productSvc: ProductServiceClient;
@@ -99,6 +101,12 @@ export class OrderService implements OnModuleInit {
           amount: orderItem.price,
         }),
       );
+      const newTransaction = new this.transactionModel({
+        creditAccount: orderItem.sellerId,
+        debitAccount: data.userId,
+        amount: orderItem.price,
+      });
+      await newTransaction.save();
       const createdOrder = await this.orderModel.create(orderItem);
       createdOrders.push(createdOrder);
       const decreasedStockData: DecreaseStockResponse = await firstValueFrom(
@@ -161,7 +169,13 @@ export class OrderService implements OnModuleInit {
           amount: order.price,
         }),
       );
-      order.save();
+      const newTransaction = new this.transactionModel({
+        creditAccount: data.userId,
+        debitAccount: product.data.sellerId,
+        amount: order.price,
+      });
+      await newTransaction.save();
+      await order.save();
       return {
         status: HttpStatus.OK,
         response: orderResponseMessages.ORDER_CANCELLED,
